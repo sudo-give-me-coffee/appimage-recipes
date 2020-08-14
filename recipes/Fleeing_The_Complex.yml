@@ -1,0 +1,45 @@
+app: Fleeing_The_Complex
+
+ingredients:
+  script:
+    - wget -c http://farm.stickpage.com/fleeingthecomplexgame.swf
+    - wget -c https://fpdownload.macromedia.com/pub/labs/flashruntimes/flashplayer/linux64/flash_player_sa_linux.x86_64.tar.gz
+    - tar -x -f flash_player_sa_linux.x86_64.tar.gz --directory .
+    - wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-$(arch).AppImage -O appimagetool
+    - chmod +x appimagetool
+    - ./appimagetool --appimage-extract
+    - cat > appimagetool2 << EOF
+    - #!/bin/sh
+    - export ARCH=x86_64
+    - squashfs-root/AppRun \${@}
+    - mkdir ../out
+    - mv *.AppImage ../out
+    - exit 1
+    - EOF
+    - chmod +x appimagetool2
+
+script:
+  - wget -c https://pht.qoo-static.com/OGVEBYdljSo15u8tic7P_V268tP74iyWqL65iFMjaxUSyZ4wmrIjB8f-1uuIWPTEafjP=w300 -O fleeingthecomplexgame.png
+  - cat > fleeingthecomplexgame.desktop << EOF
+  - [Desktop Entry]
+  - Version=1.0
+  - Type=Application
+  - Name=Fleeing The Complex
+  - Icon=fleeingthecomplexgame
+  - Exec=fleeingthecomplexgame
+  - Categories=Game;
+  - Terminal=false
+  - EOF
+  - mkdir -p usr/bin/
+  - cp ../flashplayer usr/bin/fleeingthecomplexgame.player
+  - cp ../fleeingthecomplexgame.swf usr/bin/
+  - cat > usr/bin/fleeingthecomplexgame << EOF
+  - #!/bin/sh
+  - ITS_ME=\$(readlink -f "\${0}")
+  - "\${ITS_ME}.player"  "\${ITS_ME}.swf"
+  - EOF
+  - chmod +x usr/bin/fleeingthecomplexgame.player
+  - chmod +x usr/bin/fleeingthecomplexgame
+  - # Fix appimagetool bug that require ARCH=
+  - cd ..
+  - ./appimagetool2 Fleeing_The_Complex.AppDir
